@@ -1,0 +1,73 @@
+name: astromitra
+description: AstroMitra — Vedic Kundli & Astro Chat, backed by the AstroMitra API.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  # Flutter 3.27+ required (ships with Dart 3.6+) — both google_mobile_ads
+  # v7 and the Color.withValues() API used throughout this app's theme
+  # need it. Run `flutter --version` and upgrade if you're on an older
+  # Flutter install.
+  sdk: '>=3.6.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management — kept to Provider (simple, well-understood,
+  # lightweight) rather than a heavier framework, per the "smooth but
+  # lightweight" requirement.
+  provider: ^6.1.2
+
+  # Networking. Plain `http` rather than a heavier client — this app's
+  # needs (JSON POST/GET, manual timeout/retry) don't need more than that,
+  # and it keeps the dependency surface small.
+  http: ^1.2.2
+
+  # Secure on-device storage for kundliId(s) and cached session data.
+  flutter_secure_storage: ^10.3.1
+
+  # Non-sensitive local cache (chat history, cached chart JSON) — larger
+  # blobs than flutter_secure_storage is meant for; nothing here is a
+  # credential or secret.
+  shared_preferences: ^2.3.2
+
+  # AdMob: banner in Astro Chat, rewarded ad for the daily +20 credit
+  # bonus. No ad network keys are hardcoded in Dart — see
+  # core/ads/ad_service.dart and the README for where real IDs go.
+  google_mobile_ads: ^7.0.0
+
+  # Date formatting for birth date/time display.
+  intl: ^0.19.0
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/astro-icon.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/astro-icon.png"
+  windows:
+    generate: true
+    image_path: "assets/astro-icon.png"
+  macos:
+    generate: true
+    image_path: "assets/astro-icon.png"
+  linux:
+    generate: true
+    image_path: "assets/astro-icon.png"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/astro-icon.png
+
