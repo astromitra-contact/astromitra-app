@@ -20,20 +20,15 @@ class AppConfig {
   /// runtime so the correct default is picked for each platform.
   static const String _apiBaseUrlEnv = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: '',
+    defaultValue: 'https://astromitra-kundliapi.onrender.com',
   );
 
   /// Runtime-resolved backend base URL.
   ///   - If --dart-define=API_BASE_URL was provided, that value is always used.
-  ///   - On web (Chrome / Edge) defaults to http://localhost:3000.
-  ///   - On Android emulator defaults to http://10.0.2.2:3000.
-  ///   - On other platforms (Windows desktop, iOS simulator) defaults to
-  ///     http://localhost:3000.
+  ///   - Defaults to https://astromitra-kundliapi.onrender.com
   static String get apiBaseUrl {
     if (_apiBaseUrlEnv.isNotEmpty) return _apiBaseUrlEnv;
-    if (kIsWeb) return 'http://localhost:3000';
-    // For physical Android device with `adb reverse tcp:3000 tcp:3000`
-    return 'http://127.0.0.1:3000';
+    return 'https://astromitra-kundliapi.onrender.com';
   }
 
   static const Duration requestTimeout = Duration(seconds: 20);
