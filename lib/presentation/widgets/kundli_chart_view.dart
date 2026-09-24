@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/kundli_pdf_service.dart';
 import '../../data/models/kundli_models.dart';
 import 'chart/north_indian_chart.dart';
 import 'chart/south_indian_chart.dart';
@@ -16,7 +17,7 @@ const Map<String, String> _planetAbbrev = {
 String _abbreviate(PlanetInfo p) {
   final key = (p.key.isNotEmpty ? p.key : p.name).toLowerCase();
   final short = _planetAbbrev[key] ?? (p.name.isNotEmpty ? p.name.substring(0, p.name.length.clamp(0, 2)) : '?');
-  return p.isRetrograde ? '${short}(R)' : short;
+  return p.isRetrograde ? '$short(R)' : short;
 }
 
 class KundliChartView extends StatefulWidget {
@@ -31,6 +32,14 @@ class KundliChartView extends StatefulWidget {
 class _KundliChartViewState extends State<KundliChartView> {
   int _tab = 0;
   bool _planetsExpanded = false;
+
+  void _showDownloadOptions() {
+    KundliPdfService.showDownloadFormatPicker(
+      context,
+      kundli: widget.kundli,
+      currentActiveTab: _tab,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -245,11 +254,9 @@ class _KundliChartViewState extends State<KundliChartView> {
 
         const SizedBox(height: 18),
         PrimaryButton(
-          label: 'Download Kundli',
+          label: 'Download Kundli PDF',
           icon: Icons.download_rounded,
-          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Kundli PDF download is coming soon.')),
-          ),
+          onPressed: _showDownloadOptions,
         ),
       ],
     );
