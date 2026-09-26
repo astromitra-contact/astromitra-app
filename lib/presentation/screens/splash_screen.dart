@@ -59,10 +59,13 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Your Cosmic Guide',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 15, letterSpacing: 0.3),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    'Vedic Astrology, Kundli & Horoscope',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 15, letterSpacing: 0.3),
+                  ),
                 ),
                 const Spacer(flex: 2),
                 const SizedBox(
