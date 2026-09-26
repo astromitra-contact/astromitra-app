@@ -11,6 +11,7 @@ import '../providers/kundli_provider.dart';
 import '../widgets/brand_emblem.dart';
 import '../widgets/star_field_background.dart';
 import 'astro_chat_screen.dart';
+import 'daily_horoscope_screen.dart';
 import 'onboarding/onboarding_flow_screen.dart';
 import 'view_kundli_screen.dart';
 
@@ -137,6 +138,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 subtitle: 'Ask anything about your life and future',
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AstroChatScreen()),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _HomeActionTile(
+                icon: Icons.auto_awesome_rounded,
+                title: 'Daily Horoscope',
+                subtitle: 'Your daily cosmic forecast & zodiac predictions',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const DailyHoroscopeScreen()),
                 ),
               ),
               const SizedBox(height: 20),
