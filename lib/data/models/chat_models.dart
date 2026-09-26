@@ -80,7 +80,19 @@ class CreditStatus {
     final rewardClaimedToday = json['rewardClaimedToday'] == true;
     final rawCredits = (json['remainingCredits'] as num?)?.toInt() ?? 0;
 
-    final remainingCredits = (remainingQuestions == 0 && rewardClaimedToday) ? 0 : rawCredits;
+    // Display-only buffer: when normal allowance is just exhausted (backend
+    // returns 0) but the reward ad hasn't been claimed yet, show a small
+    // cosmetic credit count (3–4) so the badge doesn't jump straight to 0.
+    // Once the reward is claimed the backend returns the real total (e.g. 23).
+    final normalQuestionsUsed = (json['normalQuestionsUsed'] as num?)?.toInt() ?? 0;
+    final int remainingCredits;
+    if (rawCredits == 0 && !rewardClaimedToday && normalQuestionsUsed >= 4) {
+      // Seed with today's date so the number is stable across refreshes.
+      final seed = DateTime.now().day + DateTime.now().month;
+      remainingCredits = 3 + (seed % 2); // gives either 3 or 4
+    } else {
+      remainingCredits = rawCredits;
+    }
 
     return CreditStatus(
       normalDailyCredits: (json['normalDailyCredits'] as num?)?.toInt() ?? 0,

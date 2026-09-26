@@ -13,12 +13,15 @@ class AppTheme {
       colorScheme: base.colorScheme.copyWith(
         surface: AppColors.surface,
         primary: AppColors.brass,
-        secondary: AppColors.violet,
+        secondary: AppColors.goldBright,
         error: AppColors.danger,
+        onPrimary: AppColors.onGold,
+        onSurface: AppColors.textPrimary,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.background,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: AppTextStyles.heading,
         iconTheme: IconThemeData(color: AppColors.textPrimary),
@@ -66,7 +69,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.brass,
-          foregroundColor: const Color(0xFF1A1400),
+          foregroundColor: AppColors.onGold,
           disabledBackgroundColor: AppColors.brass.withValues(alpha: 0.35),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -77,7 +80,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.textPrimary,
-          side: const BorderSide(color: AppColors.border),
+          side: const BorderSide(color: AppColors.borderGold),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           textStyle: AppTextStyles.button,
@@ -85,7 +88,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.violet,
+          foregroundColor: AppColors.goldBright,
           textStyle: AppTextStyles.button,
         ),
       ),
@@ -94,7 +97,10 @@ class AppTheme {
         backgroundColor: AppColors.surfaceElevated,
         contentTextStyle: AppTextStyles.body,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.borderGold, width: 0.8),
+        ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppColors.surfaceElevated,
@@ -126,4 +132,6 @@ class AppTheme {
       drawerTheme: const DrawerThemeData(backgroundColor: AppColors.surface),
     );
   }
+
+  static ThemeData get light => dark;
 }

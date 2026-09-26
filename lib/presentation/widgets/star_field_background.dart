@@ -20,12 +20,7 @@ class StarFieldBackground extends StatelessWidget {
         Positioned.fill(
           child: DecoratedBox(
             decoration: const BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment(0, -0.8),
-                radius: 1.4,
-                colors: [Color(0xFF1C2050), AppColors.background],
-                stops: [0.0, 0.65],
-              ),
+              color: AppColors.background,
             ),
           ),
         ),
@@ -39,18 +34,7 @@ class StarFieldBackground extends StatelessWidget {
 class _StarFieldPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final random = Random(42); // fixed seed — stable, non-flickering scatter
-    final paintGold = Paint()..color = AppColors.brass.withValues(alpha: 0.5);
-    final paintWhite = Paint()..color = Colors.white.withValues(alpha: 0.35);
-    final paintViolet = Paint()..color = AppColors.violet.withValues(alpha: 0.4);
-
-    for (var i = 0; i < 70; i++) {
-      final dx = random.nextDouble() * size.width;
-      final dy = random.nextDouble() * size.height * 0.75;
-      final radius = 0.6 + random.nextDouble() * 1.2;
-      final paint = i % 9 == 0 ? paintGold : (i % 13 == 0 ? paintViolet : paintWhite);
-      canvas.drawCircle(Offset(dx, dy), radius, paint);
-    }
+    // No dots — clean pure black background
   }
 
   @override
@@ -91,7 +75,7 @@ class _ChartWheelPainter extends CustomPainter {
     }
 
     final spokePaint = Paint()
-      ..color = AppColors.violet.withValues(alpha: 0.14)
+      ..color = AppColors.gold.withValues(alpha: 0.16)
       ..strokeWidth = 1;
     final tickPaint = Paint()..color = AppColors.brass.withValues(alpha: 0.55);
 

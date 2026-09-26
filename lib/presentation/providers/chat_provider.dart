@@ -140,6 +140,14 @@ class ChatProvider extends ChangeNotifier {
     return _localCache.saveChatHistory(kundliId, messages.map((m) => m.toJson()).toList());
   }
 
+  Future<void> deleteMessage(ChatMessage message) async {
+    messages = messages.where((m) => m != message).toList();
+    notifyListeners();
+    if (_kundliId != null) {
+      await _persist(_kundliId!);
+    }
+  }
+
   Future<void> clearHistory(String kundliId) async {
     messages = [];
     errorMessage = null;

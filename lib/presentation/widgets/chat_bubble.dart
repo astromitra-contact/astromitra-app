@@ -6,12 +6,41 @@ import '../../data/models/chat_models.dart';
 
 class ChatBubble extends StatelessWidget {
   final ChatMessage message;
+  final bool isSelected;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
-  const ChatBubble({super.key, required this.message});
+  const ChatBubble({
+    super.key,
+    required this.message,
+    this.isSelected = false,
+    this.onTap,
+    this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isUser = message.role == ChatRole.user;
+
+    final hasQuote = message.text.startsWith('> ') && message.text.contains('\n');
+    String? quoteHeader;
+    String? quoteBody;
+    String mainText = message.text;
+
+    if (hasQuote) {
+      final firstLineEnd = message.text.indexOf('\n');
+      final firstLine = message.text.substring(2, firstLineEnd).trim();
+      mainText = message.text.substring(firstLineEnd + 1).trim();
+
+      final colonIdx = firstLine.indexOf(':');
+      if (colonIdx != -1) {
+        quoteHeader = firstLine.substring(0, colonIdx).trim();
+        quoteBody = firstLine.substring(colonIdx + 1).trim();
+      } else {
+        quoteHeader = isUser ? 'You' : 'AstroMitra';
+        quoteBody = firstLine;
+      }
+    }
 
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 240),
@@ -26,29 +55,98 @@ class ChatBubble extends StatelessWidget {
           ),
         );
       },
-      child: Align(
-        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.80),
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 11),
-          decoration: BoxDecoration(
-            color: isUser ? AppColors.brass : AppColors.surfaceElevated,
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(16),
-              topRight: const Radius.circular(16),
-              bottomLeft: Radius.circular(isUser ? 16 : 4),
-              bottomRight: Radius.circular(isUser ? 4 : 16),
-            ),
-            border: isUser
-                ? null
-                : Border.all(color: AppColors.borderGold.withValues(alpha: 0.2)),
-          ),
-          child: Text(
-            message.text,
-            style: AppTextStyles.body.copyWith(
-              color: isUser ? const Color(0xFF1A1400) : AppColors.textPrimary,
-              height: 1.36,
+      child: Container(
+        color: isSelected ? AppColors.gold.withValues(alpha: 0.15) : Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: Align(
+          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+          child: GestureDetector(
+            onTap: onTap,
+            onLongPress: onLongPress,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.80),
+              margin: const EdgeInsets.symmetric(vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: isUser
+                    ? AppColors.brass
+                    : (isSelected ? const Color(0xFF22201C) : AppColors.surfaceElevated),
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: Radius.circular(isUser ? 16 : 4),
+                  bottomRight: Radius.circular(isUser ? 4 : 16),
+                ),
+                border: isSelected
+                    ? Border.all(color: AppColors.gold, width: 1.8)
+                    : (isUser
+                        ? null
+                        : Border.all(color: AppColors.borderGold.withValues(alpha: 0.2))),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.gold.withValues(alpha: 0.25),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (hasQuote)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border(
+                          left: BorderSide(
+                            color: isUser ? Colors.black54 : AppColors.gold,
+                            width: 3.5,
+                          ),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            quoteHeader ?? '',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: isUser ? Colors.black87 : AppColors.goldBright,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            quoteBody ?? '',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isUser
+                                  ? Colors.black87.withValues(alpha: 0.75)
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  Text(
+                    mainText,
+                    style: AppTextStyles.body.copyWith(
+                      color: isUser ? AppColors.onGold : AppColors.textPrimary,
+                      height: 1.36,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

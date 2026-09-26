@@ -10,9 +10,9 @@ class TermsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LegalScreenScaffold(
+    return const LegalScreenScaffold(
       title: 'Terms of Service',
-      children: const [
+      children: [
         _DraftNotice(),
         LegalParagraph('Last updated: [add date before publishing]'),
         LegalHeading('Astrology is for reflection, not certainty'),

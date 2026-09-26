@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 /// Central runtime configuration. Nothing secret lives here — the backend
 /// base URL is a plain endpoint address, not a credential, and every value

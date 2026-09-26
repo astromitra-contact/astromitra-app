@@ -14,9 +14,9 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LegalScreenScaffold(
+    return const LegalScreenScaffold(
       title: 'Privacy Policy',
-      children: const [
+      children: [
         _DraftNotice(),
         LegalParagraph('Last updated: [add date before publishing]'),
         LegalHeading('What we collect'),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -48,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: BrandEmblem(size: 36),
+                    child: BrandEmblem(size: 48),
                   ),
                   Expanded(
                     child: Padding(
@@ -74,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       border: Border.all(color: AppColors.gold.withValues(alpha: 0.5)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.4),
+                          color: Colors.black.withValues(alpha: 0.08),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -142,6 +144,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: creditProvider.status,
                 isLoading: creditProvider.isLoading,
               ),
+              if ((creditProvider.status?.remainingCredits ?? 1) == 0 &&
+                  (creditProvider.status?.rewardClaimedToday ?? false)) ...[  
+                const SizedBox(height: 12),
+                const _CreditResetTimerCard(),
+              ],
             ],
           ),
         ),
@@ -208,6 +215,93 @@ class _DailyCreditsCard extends StatelessWidget {
   }
 }
 
+/// Countdown card shown when all credits (normal + reward) are exhausted.
+/// Ticks every second down to the next 12:00 AM reset.
+class _CreditResetTimerCard extends StatefulWidget {
+  const _CreditResetTimerCard();
+
+  @override
+  State<_CreditResetTimerCard> createState() => _CreditResetTimerCardState();
+}
+
+class _CreditResetTimerCardState extends State<_CreditResetTimerCard> {
+  late Timer _timer;
+  late Duration _remaining;
+
+  Duration _timeUntilMidnight() {
+    final now = DateTime.now();
+    final midnight = DateTime(now.year, now.month, now.day + 1);
+    return midnight.difference(now);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _remaining = _timeUntilMidnight();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _remaining = _timeUntilMidnight());
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  String _fmt(Duration d) {
+    final h = d.inHours.toString().padLeft(2, '0');
+    final m = (d.inMinutes % 60).toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$h:$m:$s';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Credits Reset In', style: AppTextStyles.label),
+                const SizedBox(height: 10),
+                Text(
+                  _fmt(_remaining),
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.goldBright,
+                    letterSpacing: 3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: AppColors.gold.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.access_time_rounded, color: AppColors.goldBright, size: 22),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _WelcomeBanner extends StatelessWidget {
   final VoidCallback onExplore;
 
@@ -247,7 +341,15 @@ class _WelcomeBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          const BrandEmblem(size: 76),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset(
+              'assets/astro-icon-banner.png',
+              width: 100,
+              height: 100,
+              fit: BoxFit.contain,
+            ),
+          ),
         ],
       ),
     );

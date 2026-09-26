@@ -8,6 +8,7 @@ class ChatInputBar extends StatelessWidget {
   final bool isSending;
   final bool enabled;
   final String hintText;
+  final FocusNode? focusNode;
 
   const ChatInputBar({
     super.key,
@@ -16,6 +17,7 @@ class ChatInputBar extends StatelessWidget {
     required this.isSending,
     this.enabled = true,
     this.hintText = 'Ask about your chart\u2026',
+    this.focusNode,
   });
 
   @override
@@ -34,6 +36,7 @@ class ChatInputBar extends StatelessWidget {
               constraints: const BoxConstraints(maxHeight: 120),
               child: TextField(
                 controller: controller,
+                focusNode: focusNode,
                 enabled: enabled && !isSending,
                 minLines: 1,
                 maxLines: 5,
@@ -91,11 +94,11 @@ class _SendButton extends StatelessWidget {
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2.2, color: Color(0xFF1A1400)),
+                    child: CircularProgressIndicator(strokeWidth: 2.2, color: AppColors.onGold),
                   )
                 : Icon(
                     Icons.arrow_upward_rounded,
-                    color: disabled ? AppColors.textMuted : const Color(0xFF1A1400),
+                    color: disabled ? AppColors.textMuted : AppColors.onGold,
                     size: 20,
                   ),
           ),

@@ -55,7 +55,7 @@ class SouthIndianChart extends StatelessWidget {
           final cell = constraints.maxWidth / 4;
           return Container(
             decoration: BoxDecoration(
-              border: Border.all(color: AppColors.gold.withValues(alpha: 0.55)),
+              border: Border.all(color: AppColors.gold.withValues(alpha: 0.65)),
             ),
             child: Stack(
               children: [
@@ -69,7 +69,7 @@ class SouthIndianChart extends StatelessWidget {
                         height: cell,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.gold.withValues(alpha: 0.3), width: 0.6),
+                            border: Border.all(color: AppColors.gold.withValues(alpha: 0.35), width: 0.7),
                           ),
                         ),
                       ),

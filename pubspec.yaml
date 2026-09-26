@@ -56,6 +56,8 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/astro-icon.png"
   min_sdk_android: 21
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/astro-icon.png"
   web:
     generate: true
     image_path: "assets/astro-icon.png"
@@ -73,4 +75,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/astro-icon.png
+    - assets/astro-icon-banner.png
 

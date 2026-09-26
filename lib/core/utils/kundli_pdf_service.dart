@@ -804,15 +804,15 @@ class KundliPdfService {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: const Color(0xFF1E1A12),
+          backgroundColor: const Color(0xFF0D0D0D),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: Color(0xFFD4AF37), width: 1),
+            side: const BorderSide(color: Color(0xFFC59B27), width: 1),
           ),
           content: Row(
             children: [
-              const Icon(Icons.check_circle_rounded, color: Color(0xFFD4AF37), size: 24),
+              const Icon(Icons.check_circle_rounded, color: Color(0xFFC59B27), size: 24),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -822,7 +822,7 @@ class KundliPdfService {
                     const Text(
                       'PDF Downloaded Successfully',
                       style: TextStyle(
-                        color: Color(0xFFF3D47A),
+                        color: Color(0xFFE5BE58),
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                       ),
@@ -861,7 +861,7 @@ class KundliPdfService {
   }) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF16141F),
+      backgroundColor: const Color(0xFF161616),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -878,10 +878,10 @@ class KundliPdfService {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                        color: const Color(0xFFC59B27).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFFD4AF37), size: 22),
+                      child: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFFC59B27), size: 22),
                     ),
                     const SizedBox(width: 12),
                     const Column(
@@ -890,14 +890,14 @@ class KundliPdfService {
                         Text(
                           'Download Kundli PDF',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFFFFFFFF),
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         Text(
                           'Select chart format to download',
-                          style: TextStyle(color: Colors.white54, fontSize: 12),
+                          style: TextStyle(color: Color(0xFF888888), fontSize: 12),
                         ),
                       ],
                     ),
@@ -984,13 +984,13 @@ class _FormatOptionTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF221F2C),
+            color: const Color(0xFF121212),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: isRecommended
-                  ? const Color(0xFFD4AF37).withValues(alpha: 0.6)
-                  : const Color(0xFF353043),
-              width: isRecommended ? 1.2 : 0.8,
+                  ? const Color(0xFFC59B27)
+                  : const Color(0xFF262626),
+              width: isRecommended ? 1.4 : 0.8,
             ),
           ),
           child: Row(
@@ -1000,13 +1000,13 @@ class _FormatOptionTile extends StatelessWidget {
                 height: 38,
                 decoration: BoxDecoration(
                   color: isRecommended
-                      ? const Color(0xFFD4AF37).withValues(alpha: 0.2)
-                      : const Color(0xFF2C273A),
+                      ? const Color(0xFFC59B27).withValues(alpha: 0.18)
+                      : const Color(0xFF1C1C1C),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   icon,
-                  color: isRecommended ? const Color(0xFFF3D47A) : Colors.white70,
+                  color: isRecommended ? const Color(0xFFC59B27) : const Color(0xFF888888),
                   size: 20,
                 ),
               ),
@@ -1017,12 +1017,15 @@ class _FormatOptionTile extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                        Flexible(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              color: Color(0xFFFFFFFF),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (badgeText != null) ...[
@@ -1030,13 +1033,13 @@ class _FormatOptionTile extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                              color: const Color(0xFFC59B27).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               badgeText!,
                               style: const TextStyle(
-                                color: Color(0xFFF3D47A),
+                                color: Color(0xFFC59B27),
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.6,
@@ -1049,7 +1052,7 @@ class _FormatOptionTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(color: Colors.white54, fontSize: 11.5),
+                      style: const TextStyle(color: Color(0xFF888888), fontSize: 11.5),
                     ),
                   ],
                 ),

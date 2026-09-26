@@ -26,14 +26,14 @@ class PrimaryButton extends StatelessWidget {
             ? const SizedBox(
                 height: 20,
                 width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2.4, color: Color(0xFF1A1400)),
+                child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.onGold),
               )
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: 18, color: const Color(0xFF1A1400)),
+                    Icon(icon, size: 18, color: AppColors.onGold),
                     const SizedBox(width: 8),
                   ],
                   Text(label),

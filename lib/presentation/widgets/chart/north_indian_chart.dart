@@ -98,11 +98,11 @@ class _NorthIndianLinesPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
     final line = Paint()
-      ..color = AppColors.gold.withValues(alpha: 0.55)
+      ..color = AppColors.gold.withValues(alpha: 0.65)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
+      ..strokeWidth = 1.3;
 
-    final tl = Offset(0, 0);
+    const tl = Offset(0, 0);
     final tr = Offset(w, 0);
     final br = Offset(w, h);
     final bl = Offset(0, h);
