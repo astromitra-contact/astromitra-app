@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../providers/credit_provider.dart';
 import '../providers/kundli_provider.dart';
 import '../widgets/credit_badge.dart';
-import 'legal/about_screen.dart';
-import 'legal/privacy_policy_screen.dart';
-import 'legal/terms_screen.dart';
 import 'onboarding/onboarding_flow_screen.dart';
 import 'view_kundli_screen.dart';
 
@@ -83,24 +82,17 @@ class SettingsScreen extends StatelessWidget {
             _SettingsTile(
               icon: Icons.privacy_tip_outlined,
               label: 'Privacy Policy',
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen())),
+              onTap: () => _openUrl(context, 'https://astromitra-policy.nextrendx.in/privacy-policy.html'),
             ),
             _SettingsTile(
               icon: Icons.description_outlined,
               label: 'Terms & Conditions',
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TermsScreen())),
-            ),
-            _SettingsTile(
-              icon: Icons.info_outline_rounded,
-              label: 'About AstroMitra',
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AboutScreen())),
+              onTap: () => _openUrl(context, 'https://astromitra-policy.nextrendx.in/terms-and-conditions.html'),
             ),
             _SettingsTile(
               icon: Icons.share_outlined,
               label: 'Share App',
-              onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Sharing is coming soon.')),
-              ),
+              onTap: () => _shareApp(context),
             ),
 
             const SizedBox(height: 20),
@@ -117,6 +109,37 @@ class SettingsScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _openUrl(BuildContext context, String urlString) async {
+    final uri = Uri.parse(urlString);
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open link.')),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open link.')),
+        );
+      }
+    }
+  }
+
+  Future<void> _shareApp(BuildContext context) async {
+    final box = context.findRenderObject() as RenderBox?;
+    await SharePlus.instance.share(
+      ShareParams(
+        text: 'AstroMitra — Vedic Kundli & AI Astrology.\nGet instant insights into your birth chart, daily horoscope, and ask anything to AstroMitra AI!\nhttps://astromitra-policy.nextrendx.in',
+        sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
       ),
     );
   }
@@ -211,7 +234,6 @@ class _SettingsTile extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           leading: Icon(icon, color: AppColors.gold, size: 21),
           title: Text(label, style: AppTextStyles.body),
-          trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
           onTap: onTap,
         ),
       ),
