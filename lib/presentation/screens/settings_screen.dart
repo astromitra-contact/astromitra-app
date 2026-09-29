@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -136,12 +140,42 @@ class SettingsScreen extends StatelessWidget {
 
   Future<void> _shareApp(BuildContext context) async {
     final box = context.findRenderObject() as RenderBox?;
-    await SharePlus.instance.share(
-      ShareParams(
-        text: 'AstroMitra — Vedic Kundli & AI Astrology.\nGet instant insights into your birth chart, daily horoscope, and ask anything to AstroMitra AI!\nhttps://astromitra-policy.nextrendx.in',
-        sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
-      ),
-    );
+    final sharePositionOrigin =
+        box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
+    const shareText =
+        '🌟 AstroMitra — Vedic Kundli & AI Astrology 🌟\n\n'
+        'Get instant insights into your Janam Kundli, Daily Horoscope, Doshas, and chat directly with AstroMitra AI!\n\n'
+        '📲 Download now from Google Play Store:\n'
+        'https://play.google.com/store/apps/details?id=com.astromitra.app';
+
+    try {
+      final byteData = await rootBundle.load('assets/astro-icon.png');
+      final tempDir = await getTemporaryDirectory();
+      final iconFile = File('${tempDir.path}/astromitra_icon.png');
+      await iconFile.writeAsBytes(
+        byteData.buffer.asUint8List(
+          byteData.offsetInBytes,
+          byteData.lengthInBytes,
+        ),
+        flush: true,
+      );
+
+      await SharePlus.instance.share(
+        ShareParams(
+          text: shareText,
+          files: [XFile(iconFile.path, mimeType: 'image/png')],
+          sharePositionOrigin: sharePositionOrigin,
+        ),
+      );
+    } catch (_) {
+      await SharePlus.instance.share(
+        ShareParams(
+          text: shareText,
+          sharePositionOrigin: sharePositionOrigin,
+        ),
+      );
+    }
   }
 
 
