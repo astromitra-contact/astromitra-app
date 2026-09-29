@@ -82,7 +82,11 @@ class ChatProvider extends ChangeNotifier {
       return true;
     } on ApiException catch (e) {
       isSending = false;
-      errorMessage = e.message;
+      if (e.code == 'ALL_AI_PROVIDERS_FAILED') {
+        errorMessage = 'AstroMitra is currently reviewing astrological charts for many seekers. Please ask your question again in a moment.';
+      } else {
+        errorMessage = e.message;
+      }
       if (e.code == 'QUESTION_LIMIT_REACHED') {
         questionLimitReached = true;
       }
@@ -90,7 +94,7 @@ class ChatProvider extends ChangeNotifier {
       return false;
     } catch (e) {
       isSending = false;
-      errorMessage = 'Could not send your question. Please try again.';
+      errorMessage = 'AstroMitra could not connect right now. Please check your internet connection and try again.';
       notifyListeners();
       return false;
     }
