@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../providers/language_provider.dart';
 import 'home_screen.dart';
 import 'settings_screen.dart';
 
@@ -19,13 +20,16 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   late int _index = widget.initialIndex;
 
-  static const _tabs = [
-    _TabDef(icon: Icons.home_rounded, outlineIcon: Icons.home_outlined, label: 'Home'),
-    _TabDef(icon: Icons.settings_rounded, outlineIcon: Icons.settings_outlined, label: 'Settings'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final homeLabel = context.tr('home');
+    final settingsLabel = context.tr('settings');
+
+    final tabs = [
+      _TabDef(icon: Icons.home_rounded, outlineIcon: Icons.home_outlined, label: homeLabel),
+      _TabDef(icon: Icons.settings_rounded, outlineIcon: Icons.settings_outlined, label: settingsLabel),
+    ];
+
     return Scaffold(
       body: IndexedStack(
         index: _index,
@@ -38,7 +42,7 @@ class _MainShellState extends State<MainShell> {
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
         items: [
-          for (final tab in _tabs)
+          for (final tab in tabs)
             BottomNavigationBarItem(
               icon: Icon(tab.outlineIcon),
               activeIcon: Icon(tab.icon, color: AppColors.gold),

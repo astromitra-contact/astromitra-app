@@ -8,6 +8,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../data/models/chat_models.dart';
 import '../providers/credit_provider.dart';
 import '../providers/kundli_provider.dart';
+import '../providers/language_provider.dart';
 import '../widgets/brand_emblem.dart';
 import '../widgets/star_field_background.dart';
 import 'astro_chat_screen.dart';
@@ -68,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Tooltip(
-                    message: name != null && name.isNotEmpty ? name : 'Guest User',
+                    message: name != null && name.isNotEmpty ? name : context.tr('guestUser'),
                     triggerMode: TooltipTriggerMode.tap,
                     preferBelow: true,
                     decoration: BoxDecoration(
@@ -117,12 +118,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 22),
-              const Text('What would you like to do?', style: AppTextStyles.heading),
+              Text(context.tr('whatWouldYouLikeToDo'), style: AppTextStyles.heading),
               const SizedBox(height: 14),
               _HomeActionTile(
                 icon: Icons.grid_view_rounded,
-                title: 'Create Kundli',
-                subtitle: 'Generate your detailed birth chart',
+                title: context.tr('createKundli'),
+                subtitle: context.tr('createKundliSubtitle'),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => kundliProvider.hasActiveKundli
@@ -134,8 +135,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 12),
               _HomeActionTile(
                 icon: Icons.chat_bubble_rounded,
-                title: 'Chat with Astromitra',
-                subtitle: 'Ask anything about your life and future',
+                title: context.tr('chatWithAstroMitra'),
+                subtitle: context.tr('chatSubtitle'),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AstroChatScreen()),
                 ),
@@ -143,8 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 12),
               _HomeActionTile(
                 icon: Icons.auto_awesome_rounded,
-                title: 'Daily Horoscope',
-                subtitle: 'Your daily cosmic forecast & zodiac predictions',
+                title: context.tr('dailyHoroscope'),
+                subtitle: context.tr('horoscopeSubtitle'),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const DailyHoroscopeScreen()),
                 ),
@@ -192,7 +193,7 @@ class _DailyCreditsCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Daily Credits', style: AppTextStyles.label),
+                Text(context.tr('dailyCredits'), style: AppTextStyles.label),
                 const SizedBox(height: 10),
                 if (isLoading)
                   const SizedBox(
@@ -282,7 +283,7 @@ class _CreditResetTimerCardState extends State<_CreditResetTimerCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Credits Reset In', style: AppTextStyles.label),
+                Text(context.tr('creditsResetIn'), style: AppTextStyles.label),
                 const SizedBox(height: 10),
                 Text(
                   _fmt(_remaining),
@@ -333,9 +334,9 @@ class _WelcomeBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Align with the stars,\nIlluminate your path.',
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 17, fontWeight: FontWeight.w700, height: 1.3),
+                Text(
+                  context.tr('bannerTitle'),
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 17, fontWeight: FontWeight.w700, height: 1.3),
                 ),
                 const SizedBox(height: 14),
                 ElevatedButton(
@@ -345,7 +346,7 @@ class _WelcomeBanner extends StatelessWidget {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text('Explore Now'),
+                  child: Text(context.tr('exploreNow')),
                 ),
               ],
             ),

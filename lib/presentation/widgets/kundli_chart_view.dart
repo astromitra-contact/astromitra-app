@@ -46,6 +46,11 @@ class _KundliChartViewState extends State<KundliChartView> {
     final kundli = widget.kundli;
     final details = kundli.birthDetails;
 
+    final moon = kundli.planets.cast<PlanetInfo?>().firstWhere(
+      (p) => p?.key.toLowerCase() == 'moon' || p?.name.toLowerCase() == 'moon',
+      orElse: () => null,
+    );
+
     final houseMap = <int, List<String>>{};
     final rashiMap = <String, List<String>>{};
     for (final p in kundli.planets) {
@@ -111,26 +116,116 @@ class _KundliChartViewState extends State<KundliChartView> {
           ),
         ],
 
-        if (kundli.lagna != null) ...[
+        // 1. User's Own Rashi (Janma Rashi / Moon Sign) - Shown First
+        if (moon != null) ...[
           const SizedBox(height: 14),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.gold.withValues(alpha: 0.18), AppColors.surface],
+                colors: [
+                  AppColors.gold.withValues(alpha: 0.22),
+                  AppColors.surfaceElevated,
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.gold.withValues(alpha: 0.35)),
+              border: Border.all(color: AppColors.gold.withValues(alpha: 0.45)),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.gold.withValues(alpha: 0.08),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('ASCENDANT \u00b7 LAGNA', style: AppTextStyles.caption),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: AppColors.gold.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.nightlight_round, color: AppColors.goldBright, size: 14),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'JANMA RASHI \u00b7 MOON SIGN',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.goldBright,
+                        letterSpacing: 1.1,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 8),
-                Text(kundli.lagna!.rashi, style: AppTextStyles.displayMedium),
+                Text(
+                  moon.rashi,
+                  style: AppTextStyles.displayMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${moon.nakshatra} \u00b7 Pada ${moon.pada} \u00b7 ${moon.degreeInRashi.toStringAsFixed(2)}\u00b0',
+                  style: AppTextStyles.bodySecondary,
+                ),
+              ],
+            ),
+          ),
+        ],
+
+        // 2. Ascendant (Lagna) - Shown Second
+        if (kundli.lagna != null) ...[
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.gold.withValues(alpha: 0.14),
+                  AppColors.surface,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.borderGold.withValues(alpha: 0.35)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: AppColors.gold.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.wb_sunny_outlined, color: AppColors.gold, size: 14),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'ASCENDANT \u00b7 LAGNA',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textMuted,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  kundli.lagna!.rashi,
+                  style: AppTextStyles.displayMedium,
+                ),
                 const SizedBox(height: 4),
                 Text(
                   '${kundli.lagna!.nakshatra} \u00b7 Pada ${kundli.lagna!.pada} \u00b7 ${kundli.lagna!.degreeInRashi.toStringAsFixed(2)}\u00b0',

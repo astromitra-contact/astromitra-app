@@ -9,13 +9,9 @@ import '../config/app_config.dart';
 ///   - a banner inside Astro Chat, below the input area
 ///   - a rewarded ad, only for the daily +20 credit bonus
 ///
-/// No interstitials, no ads anywhere else in the app. Ad unit IDs come
-/// entirely from [AppConfig] (itself sourced from --dart-define, never
-/// hardcoded here) — see that file's doc comment for how to supply real
-/// production IDs.
-///
-/// NOTE: google_mobile_ads has no web implementation. All methods return
-/// no-ops on web so the app boots correctly in a browser.
+/// Test ads are suppressed when using test unit IDs so that no test ads
+/// run or display during Play Store verification. When real AdMob IDs
+/// are configured via --dart-define, production ads load normally.
 class AdService {
   AdService._();
   static final AdService instance = AdService._();
@@ -25,16 +21,26 @@ class AdService {
   Future<void> initialize() async {
     if (kIsWeb) return; // SDK not supported on web — skip silently.
     if (_initialized) return;
-    await MobileAds.instance.initialize();
-    _initialized = true;
+    try {
+      await MobileAds.instance.initialize();
+      _initialized = true;
+    } catch (e) {
+      debugPrint('AdService initialization failed: $e');
+    }
   }
 
-  /// Returns null on web (caller must guard before using the result).
+  /// Returns null if on web or if test ads are active (preventing test ads from showing).
   BannerAd? createChatBannerAd({
     required void Function() onLoaded,
     required void Function(String error) onFailed,
   }) {
-    if (kIsWeb) return null; // Not supported on web.
+    if (kIsWeb) return null;
+
+    // Suppress test ads so no test banner appears during Play Store review.
+    if (AppConfig.isUsingTestAdUnits) {
+      return null;
+    }
+
     final ad = BannerAd(
       adUnitId: AppConfig.admobBannerUnitId,
       size: AdSize.banner,
@@ -51,19 +57,16 @@ class AdService {
     return ad;
   }
 
-  /// Loads and immediately shows a rewarded ad. Resolves `true` only if
-  /// the user actually earned the reward (watched it through) — the
-  /// caller (credit_provider.dart) then calls the backend's
-  /// `POST /api/chat/reward` as the real, authoritative grant of credits.
-  /// This client-side "earned" signal is never itself treated as having
-  /// granted anything — it only gates whether we bother calling the
-  /// backend at all.
-  ///
-  /// On web (where Google Mobile Ads SDK is unavailable), simulates a completed ad
-  /// so development & testing can proceed in the browser.
+  /// Loads and shows rewarded ad for real production IDs.
+  /// When in test mode / verification, grants reward directly without showing Google test ads.
   Future<bool> showRewardedAd() {
     if (kIsWeb) {
       return Future.delayed(const Duration(milliseconds: 1200), () => true);
+    }
+
+    // Suppress test video ads so no test ad runs in the app.
+    if (AppConfig.isUsingTestAdUnits) {
+      return Future.delayed(const Duration(milliseconds: 600), () => true);
     }
 
     final completer = _RewardCompleter();
@@ -99,9 +102,6 @@ class AdService {
   }
 }
 
-/// Small helper so we never call `complete()` twice on the same Completer
-/// (which throws) across the several async callback paths a rewarded ad
-/// can take (dismissed / failed to show / failed to load).
 class _RewardCompleter {
   final _completer = Completer<bool>();
   bool _done = false;

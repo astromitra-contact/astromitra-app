@@ -6,10 +6,7 @@ import '../../core/ads/ad_service.dart';
 /// Banner ad for the bottom of Astro Chat, below the input bar. Shows
 /// nothing at all until the ad has actually loaded (no placeholder box
 /// reserving space and no error UI) — a failed/loading ad must never
-/// visually compete with or crowd the input area, per spec ("ads must
-/// never cover chat messages, input, buttons or important content"). The
-/// parent screen is responsible for hiding this widget entirely while the
-/// keyboard is open (see AstroChatScreen).
+/// visually compete with or crowd the input area.
 class ChatBannerAdWidget extends StatefulWidget {
   const ChatBannerAdWidget({super.key});
 
@@ -36,7 +33,7 @@ class _ChatBannerAdWidgetState extends State<ChatBannerAdWidget> {
         if (mounted) setState(() => _loaded = false);
       },
     );
-    if (ad == null) return; // Web: google_mobile_ads not supported.
+    if (ad == null) return;
     _bannerAd = ad;
   }
 

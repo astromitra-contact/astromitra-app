@@ -58,12 +58,16 @@ class KundliPdfService {
 
     final houseMap = <int, List<String>>{};
     final rashiMap = <String, List<String>>{};
+    PlanetInfo? moon;
     for (final p in kundli.planets) {
       if (p.houseNumber > 0) {
         houseMap.putIfAbsent(p.houseNumber, () => []).add(_pdfAbbreviate(p));
       }
       if (p.rashiEnglish.isNotEmpty) {
         rashiMap.putIfAbsent(p.rashiEnglish, () => []).add(_pdfAbbreviate(p));
+      }
+      if (p.key.toLowerCase() == 'moon' || p.name.toLowerCase() == 'moon') {
+        moon = p;
       }
     }
 
@@ -88,11 +92,9 @@ class KundliPdfService {
               _buildPdfHeader(titleStyleName),
               pw.SizedBox(height: 10),
               _buildPersonalDetailsSection(kundli),
-              pw.SizedBox(height: 14),
-              if (kundli.lagna != null) ...[
-                _buildLagnaBadge(kundli.lagna!),
-                pw.SizedBox(height: 14),
-              ],
+              pw.SizedBox(height: 12),
+              _buildRashiAndLagnaSection(moon: moon, lagna: kundli.lagna),
+              pw.SizedBox(height: 12),
               pw.Center(
                 child: pw.Column(
                   children: [
@@ -148,11 +150,9 @@ class KundliPdfService {
             _buildPdfHeader(titleStyleName),
             pw.SizedBox(height: 10),
             _buildPersonalDetailsSection(kundli),
-            pw.SizedBox(height: 14),
-            if (kundli.lagna != null) ...[
-              _buildLagnaBadge(kundli.lagna!),
-              pw.SizedBox(height: 14),
-            ],
+            pw.SizedBox(height: 12),
+            _buildRashiAndLagnaSection(moon: moon, lagna: kundli.lagna),
+            pw.SizedBox(height: 12),
             pw.Center(
               child: pw.Column(
                 children: [
@@ -312,64 +312,116 @@ class KundliPdfService {
     );
   }
 
-  static pw.Widget _buildLagnaBadge(LagnaInfo lagna) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: pw.BoxDecoration(
-        color: goldLight,
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-        border: pw.Border.all(color: goldPrimary, width: 1),
-      ),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
-        children: [
-          pw.Column(
-            children: [
-              pw.Text('ASCENDANT / LAGNA', style: pw.TextStyle(fontSize: 7.5, color: textMuted)),
-              pw.SizedBox(height: 2),
-              pw.Text(
-                lagna.rashi.isNotEmpty ? lagna.rashi : lagna.rashiEnglish,
-                style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: goldDark),
+  static pw.Widget _buildRashiAndLagnaSection({
+    required PlanetInfo? moon,
+    required LagnaInfo? lagna,
+  }) {
+    if (moon == null && lagna == null) return pw.SizedBox();
+
+    return pw.Row(
+      children: [
+        // Left side: User's Janma Rashi (Moon Sign)
+        if (moon != null)
+          pw.Expanded(
+            child: pw.Container(
+              padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: pw.BoxDecoration(
+                color: goldLight,
+                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                border: pw.Border.all(color: goldPrimary, width: 1),
               ),
-            ],
-          ),
-          pw.Container(width: 1, height: 22, color: borderGold),
-          pw.Column(
-            children: [
-              pw.Text('DEGREE', style: pw.TextStyle(fontSize: 7.5, color: textMuted)),
-              pw.SizedBox(height: 2),
-              pw.Text(
-                '${lagna.degreeInRashi.toStringAsFixed(2)} deg',
-                style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: textDark),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text(
+                        'JANMA RASHI (MOON SIGN)',
+                        style: pw.TextStyle(
+                          fontSize: 7.5,
+                          fontWeight: pw.FontWeight.bold,
+                          color: goldDark,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      if (moon.houseNumber > 0)
+                        pw.Text(
+                          'House ${moon.houseNumber}',
+                          style: pw.TextStyle(fontSize: 7.5, color: textMuted),
+                        ),
+                    ],
+                  ),
+                  pw.SizedBox(height: 3),
+                  pw.Text(
+                    moon.rashi.isNotEmpty ? moon.rashi : moon.rashiEnglish,
+                    style: pw.TextStyle(
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                      color: goldDark,
+                    ),
+                  ),
+                  pw.SizedBox(height: 3),
+                  pw.Text(
+                    '${moon.nakshatra} (Pada ${moon.pada}) \u00b7 ${moon.degreeInRashi.toStringAsFixed(2)} deg',
+                    style: pw.TextStyle(fontSize: 8.5, color: textDark),
+                  ),
+                ],
               ),
-            ],
-          ),
-          pw.Container(width: 1, height: 22, color: borderGold),
-          pw.Column(
-            children: [
-              pw.Text('NAKSHATRA', style: pw.TextStyle(fontSize: 7.5, color: textMuted)),
-              pw.SizedBox(height: 2),
-              pw.Text(
-                '${lagna.nakshatra} (Pada ${lagna.pada})',
-                style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: textDark),
-              ),
-            ],
-          ),
-          if (lagna.rashiLord.isNotEmpty) ...[
-            pw.Container(width: 1, height: 22, color: borderGold),
-            pw.Column(
-              children: [
-                pw.Text('RASHI LORD', style: pw.TextStyle(fontSize: 7.5, color: textMuted)),
-                pw.SizedBox(height: 2),
-                pw.Text(
-                  lagna.rashiLord,
-                  style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: textDark),
-                ),
-              ],
             ),
-          ],
-        ],
-      ),
+          ),
+        if (moon != null && lagna != null) pw.SizedBox(width: 10),
+        // Right side: Ascendant / Lagna
+        if (lagna != null)
+          pw.Expanded(
+            child: pw.Container(
+              padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: pw.BoxDecoration(
+                color: bgLight,
+                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                border: pw.Border.all(color: borderGold, width: 1),
+              ),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text(
+                        'ASCENDANT (LAGNA)',
+                        style: pw.TextStyle(
+                          fontSize: 7.5,
+                          fontWeight: pw.FontWeight.bold,
+                          color: textDark,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      if (lagna.rashiLord.isNotEmpty)
+                        pw.Text(
+                          'Lord: ${lagna.rashiLord}',
+                          style: pw.TextStyle(fontSize: 7.5, color: textMuted),
+                        ),
+                    ],
+                  ),
+                  pw.SizedBox(height: 3),
+                  pw.Text(
+                    lagna.rashi.isNotEmpty ? lagna.rashi : lagna.rashiEnglish,
+                    style: pw.TextStyle(
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                      color: textDark,
+                    ),
+                  ),
+                  pw.SizedBox(height: 3),
+                  pw.Text(
+                    '${lagna.nakshatra} (Pada ${lagna.pada}) \u00b7 ${lagna.degreeInRashi.toStringAsFixed(2)} deg',
+                    style: pw.TextStyle(fontSize: 8.5, color: textDark),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../providers/kundli_provider.dart';
+import '../providers/language_provider.dart';
 import '../widgets/kundli_chart_view.dart';
 import '../widgets/primary_button.dart';
 import 'onboarding/onboarding_flow_screen.dart';
@@ -54,21 +55,21 @@ class _EmptyKundliPrompt extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              hasStaleId ? 'Chart not available' : 'No Kundli yet',
+              hasStaleId ? context.tr('chartNotAvailable') : context.tr('noKundliYet'),
               style: AppTextStyles.heading,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 6),
             Text(
               hasStaleId
-                  ? "This Kundli's chart data isn't cached on this device. Create a new one to see it here."
-                  : 'Generate your Vedic birth chart — Ascendant, planets, houses, and more.',
+                  ? context.tr('staleKundliDesc')
+                  : context.tr('noKundliDesc'),
               style: AppTextStyles.bodySecondary,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 22),
             PrimaryButton(
-              label: 'Create Kundli',
+              label: context.tr('createKundli'),
               icon: Icons.auto_awesome_rounded,
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const OnboardingFlowScreen()),

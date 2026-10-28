@@ -6,6 +6,7 @@ import 'presentation/providers/chat_provider.dart';
 import 'presentation/providers/credit_provider.dart';
 import 'presentation/providers/horoscope_provider.dart';
 import 'presentation/providers/kundli_provider.dart';
+import 'presentation/providers/language_provider.dart';
 import 'presentation/screens/splash_screen.dart';
 
 class AstroMitraApp extends StatelessWidget {
@@ -15,17 +16,22 @@ class AstroMitraApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(create: (_) => KundliProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => CreditProvider()),
         ChangeNotifierProvider(create: (_) => HoroscopeProvider()),
       ],
-      child: MaterialApp(
-        title: 'AstroMitra',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark,
-        themeMode: ThemeMode.dark,
-        home: const SplashScreen(),
+      child: Consumer<LanguageProvider>(
+        builder: (context, langProvider, child) {
+          return MaterialApp(
+            title: 'AstroMitra',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.dark,
+            themeMode: ThemeMode.dark,
+            home: const SplashScreen(),
+          );
+        },
       ),
     );
   }

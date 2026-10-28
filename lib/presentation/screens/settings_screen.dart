@@ -7,10 +7,12 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/localization/app_language.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../providers/credit_provider.dart';
 import '../providers/kundli_provider.dart';
+import '../providers/language_provider.dart';
 import '../widgets/credit_badge.dart';
 import 'onboarding/onboarding_flow_screen.dart';
 import 'view_kundli_screen.dart';
@@ -21,10 +23,11 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kundliProvider = context.watch<KundliProvider>();
+    final languageProvider = context.watch<LanguageProvider>();
     final details = kundliProvider.activeKundliData?.birthDetails;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(context.tr('settings'))),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -50,7 +53,9 @@ class SettingsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          details != null && details.name.isNotEmpty ? details.name : 'Guest',
+                          details != null && details.name.isNotEmpty
+                              ? details.name
+                              : context.tr('guestUser'),
                           style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700),
                         ),
                       ],
@@ -61,41 +66,49 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
 
-            const _SectionLabel('Your Kundli'),
+            _SectionLabel(context.tr('yourKundli')),
             _SettingsTile(
               icon: Icons.auto_awesome_outlined,
-              label: 'My Kundli',
+              label: context.tr('myKundli'),
               onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ViewKundliScreen())),
             ),
             _SettingsTile(
               icon: Icons.edit_outlined,
-              label: 'Edit Birth Details',
+              label: context.tr('editBirthDetails'),
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => OnboardingFlowScreen(initialDetails: details),
               )),
             ),
             _SettingsTile(
               icon: Icons.bolt_outlined,
-              label: 'Daily Credits',
+              label: context.tr('dailyCredits'),
               onTap: () => _showCreditsSheet(context),
             ),
 
+            const SizedBox(height: 8),
+            _SectionLabel(context.tr('appLanguage')),
+            _SettingsTile(
+              icon: Icons.language_rounded,
+              label: context.tr('appLanguage'),
+              trailingText: languageProvider.currentLanguage.nativeName,
+              onTap: () => _showLanguageSheet(context),
+            ),
 
             const SizedBox(height: 8),
-            const _SectionLabel('About'),
+            _SectionLabel(context.tr('about')),
             _SettingsTile(
               icon: Icons.privacy_tip_outlined,
-              label: 'Privacy Policy',
+              label: context.tr('privacyPolicy'),
               onTap: () => _openUrl(context, 'https://astromitra-policy.nextrendx.in/privacy-policy.html'),
             ),
             _SettingsTile(
               icon: Icons.description_outlined,
-              label: 'Terms & Conditions',
+              label: context.tr('termsConditions'),
               onTap: () => _openUrl(context, 'https://astromitra-policy.nextrendx.in/terms-and-conditions.html'),
             ),
             _SettingsTile(
               icon: Icons.share_outlined,
-              label: 'Share App',
+              label: context.tr('shareApp'),
               onTap: () => _shareApp(context),
             ),
 
@@ -108,12 +121,142 @@ class SettingsScreen extends StatelessWidget {
                   side: const BorderSide(color: AppColors.danger),
                 ),
                 onPressed: () => _confirmDelete(context),
-                child: const Text('Delete Account'),
+                child: Text(context.tr('deleteAccount')),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showLanguageSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surfaceElevated,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (bottomSheetContext) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.7,
+          minChildSize: 0.5,
+          maxChildSize: 0.9,
+          builder: (scrollContext, scrollController) {
+            final langProv = bottomSheetContext.watch<LanguageProvider>();
+            final current = langProv.currentLanguage;
+
+            return Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.borderSoft,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.language_rounded, color: AppColors.gold, size: 22),
+                      const SizedBox(width: 10),
+                      Text(
+                        bottomSheetContext.tr('selectAppLanguage'),
+                        style: AppTextStyles.heading,
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1, color: AppColors.borderSoft),
+                Expanded(
+                  child: ListView.separated(
+                    controller: scrollController,
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                    itemCount: AppLanguage.values.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      final lang = AppLanguage.values[index];
+                      final isSelected = lang == current;
+
+                      return Material(
+                        color: isSelected
+                            ? AppColors.gold.withValues(alpha: 0.12)
+                            : AppColors.surface,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(
+                            color: isSelected ? AppColors.gold : AppColors.borderSoft,
+                            width: isSelected ? 1.5 : 1.0,
+                          ),
+                        ),
+                        child: ListTile(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          leading: Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected ? AppColors.gold : AppColors.textMuted,
+                                width: 2,
+                              ),
+                              color: isSelected ? AppColors.gold : Colors.transparent,
+                            ),
+                            child: isSelected
+                                ? const Icon(Icons.check, size: 15, color: AppColors.onGold)
+                                : null,
+                          ),
+                          title: Text(
+                            lang.nativeName,
+                            style: TextStyle(
+                              color: isSelected ? AppColors.goldBright : AppColors.textPrimary,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          subtitle: Text(
+                            lang.name,
+                            style: TextStyle(
+                              color: isSelected ? AppColors.gold : AppColors.textMuted,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                          trailing: isSelected
+                              ? Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.gold.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text(
+                                    'Active',
+                                    style: TextStyle(
+                                      color: AppColors.goldBright,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                )
+                              : null,
+                          onTap: () {
+                            langProv.setLanguage(lang);
+                            Navigator.of(bottomSheetContext).pop();
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -147,7 +290,7 @@ class SettingsScreen extends StatelessWidget {
         '🌟 AstroMitra — Vedic Kundli & AI Astrology 🌟\n\n'
         'Get instant insights into your Janam Kundli, Daily Horoscope, Doshas, and chat directly with AstroMitra AI!\n\n'
         '📲 Download now from Google Play Store:\n'
-        'https://play.google.com/store/apps/details?id=com.astromitra.app';
+        'https://play.google.com/store/apps/details?id=com.astromitra.kundli';
 
     try {
       final byteData = await rootBundle.load('assets/astro-icon.png');
@@ -178,8 +321,6 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
-
-
   void _showCreditsSheet(BuildContext context) {
     final creditProvider = context.read<CreditProvider>();
     showModalBottomSheet(
@@ -202,17 +343,19 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surfaceElevated,
-        title: const Text('Delete account and Kundli data?'),
-        content: const Text(
-          'This removes your Kundli, chat history, and credit reference from this device permanently. '
-          'This cannot be undone from within the app.',
+        title: Text(context.tr('deleteConfirmTitle')),
+        content: Text(
+          context.tr('deleteConfirmDesc'),
           style: AppTextStyles.bodySecondary,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(context.tr('cancel')),
+          ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete', style: TextStyle(color: AppColors.danger)),
+            child: Text(context.tr('delete'), style: const TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -246,11 +389,13 @@ class _SectionLabel extends StatelessWidget {
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
   final String label;
+  final String? trailingText;
   final VoidCallback onTap;
 
   const _SettingsTile({
     required this.icon,
     required this.label,
+    this.trailingText,
     required this.onTap,
   });
 
@@ -268,6 +413,23 @@ class _SettingsTile extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           leading: Icon(icon, color: AppColors.gold, size: 21),
           title: Text(label, style: AppTextStyles.body),
+          trailing: trailingText != null
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      trailingText!,
+                      style: const TextStyle(
+                        color: AppColors.goldBright,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted, size: 18),
+                  ],
+                )
+              : const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted, size: 18),
           onTap: onTap,
         ),
       ),

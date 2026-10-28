@@ -43,13 +43,18 @@ class NorthIndianChart extends StatelessWidget {
               Positioned.fill(child: CustomPaint(painter: _NorthIndianLinesPainter())),
               for (final entry in _centroids.entries)
                 Positioned(
-                  left: entry.value.dx * side - 26,
-                  top: entry.value.dy * side - 16,
-                  width: 52,
-                  height: 32,
-                  child: _HouseLabel(
-                    houseNumber: entry.key,
-                    planets: housePlanets[entry.key] ?? const [],
+                  left: entry.value.dx * side - 36,
+                  top: entry.value.dy * side - 24,
+                  width: 72,
+                  height: 48,
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: _HouseLabel(
+                        houseNumber: entry.key,
+                        planets: housePlanets[entry.key] ?? const [],
+                      ),
+                    ),
                   ),
                 ),
             ],
@@ -75,15 +80,29 @@ class _HouseLabel extends StatelessWidget {
       children: [
         Wrap(
           alignment: WrapAlignment.center,
-          spacing: 4,
-          runSpacing: 2,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 3,
+          runSpacing: 1,
           children: [
             if (isAscendant)
-              const Text('Asc', style: TextStyle(color: AppColors.goldBright, fontSize: 11, fontWeight: FontWeight.w800)),
+              const Text(
+                'Asc',
+                style: TextStyle(
+                  color: AppColors.goldBright,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  height: 1.1,
+                ),
+              ),
             for (final p in planets)
               Text(
                 p,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 11.5, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  height: 1.1,
+                ),
               ),
           ],
         ),
