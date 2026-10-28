@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../providers/kundli_provider.dart';
 import '../providers/language_provider.dart';
+import '../widgets/chat_banner_ad_widget.dart';
 import '../widgets/kundli_chart_view.dart';
 import '../widgets/primary_button.dart';
 import 'onboarding/onboarding_flow_screen.dart';
@@ -24,11 +25,56 @@ class ViewKundliScreen extends StatelessWidget {
     final kundli = kundliProvider.activeKundliData;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Kundli')),
       body: SafeArea(
-        child: kundli == null
-            ? _EmptyKundliPrompt(hasStaleId: kundliProvider.hasActiveKundli)
-            : KundliChartView(kundli: kundli),
+        child: Column(
+          children: [
+            // 1. AD FIRST: At the very top of the screen
+            const AppBannerAdWidget(),
+
+            // 2. AFTER AD: The TopBar (like chat section)
+            _buildTopBar(context),
+
+            Expanded(
+              child: kundli == null
+                  ? _EmptyKundliPrompt(hasStaleId: kundliProvider.hasActiveKundli)
+                  : KundliChartView(kundli: kundli),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopBar(BuildContext context) {
+    return Container(
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          bottom: BorderSide(color: AppColors.borderSoft, width: 0.8),
+        ),
+      ),
+      child: Row(
+        children: [
+          if (Navigator.of(context).canPop())
+            IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          else
+            const SizedBox(width: 16),
+          const Expanded(
+            child: Text(
+              'My Kundli',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -23,6 +23,7 @@ class CreditProvider extends ChangeNotifier {
   CreditStatus? status;
   bool isLoading = false;
   bool isClaimingReward = false;
+  int completedAds = 0;
   String? errorMessage;
 
   Future<void> refresh(String kundliId) async {
@@ -42,21 +43,48 @@ class CreditProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Shows the rewarded ad; only if the user actually earns it does this
-  /// call the backend to grant the real +20 credits. Returns a short
-  /// human-readable outcome for the UI to show as a snackbar/toast.
-  Future<RewardClaimOutcome> claimDailyReward(String kundliId) async {
+  /// Shows 2 rewarded ads sequentially; only after the user watches BOTH
+  /// ads completely does this call the backend to grant the real +20 credits.
+  /// Calls [onAdProgress] with (completedAds, totalAds) e.g. (1, 2).
+  Future<RewardClaimOutcome> claimDailyReward(
+    String kundliId, {
+    void Function(int completedAds, int totalAds)? onAdProgress,
+  }) async {
     isClaimingReward = true;
+    completedAds = 0;
     errorMessage = null;
     notifyListeners();
 
     try {
-      final earned = await _adService.showRewardedAd();
-      if (!earned) {
+      // Step 1: Show Ad 1 of 2
+      onAdProgress?.call(0, 2);
+      final ad1Earned = await _adService.showRewardedAd();
+      if (!ad1Earned) {
         isClaimingReward = false;
         notifyListeners();
         return RewardClaimOutcome.adNotCompleted;
       }
+
+      // Ad 1 completed
+      completedAds = 1;
+      onAdProgress?.call(1, 2);
+      notifyListeners();
+
+      // Brief delay to allow Android activity transition and ad reload
+      await Future.delayed(const Duration(milliseconds: 700));
+
+      // Step 2: Show Ad 2 of 2
+      final ad2Earned = await _adService.showRewardedAd();
+      if (!ad2Earned) {
+        isClaimingReward = false;
+        notifyListeners();
+        return RewardClaimOutcome.adNotCompleted;
+      }
+
+      // Both ads completed! Claim the +20 credits from backend
+      completedAds = 2;
+      onAdProgress?.call(2, 2);
+      notifyListeners();
 
       status = await _repository.claimReward(kundliId: kundliId);
       isClaimingReward = false;

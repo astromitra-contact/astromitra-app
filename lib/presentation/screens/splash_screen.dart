@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/ads/ad_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../providers/kundli_provider.dart';
 import '../widgets/brand_emblem.dart';
@@ -26,6 +27,11 @@ class _SplashScreenState extends State<SplashScreen> {
     final kundliProvider = context.read<KundliProvider>();
     await kundliProvider.bootstrap();
     await Future.delayed(const Duration(milliseconds: 650));
+
+    // Show first App Open Ad before transitioning into the app
+    await AdService.instance.showAppOpenAdOnStart(
+      timeout: const Duration(seconds: 4),
+    );
 
     if (!mounted) return;
 

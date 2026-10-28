@@ -10,6 +10,7 @@ import '../../../data/models/kundli_models.dart';
 import '../../providers/kundli_provider.dart';
 import '../../providers/language_provider.dart';
 import '../../widgets/birth_place_autocomplete_field.dart';
+import '../../widgets/chat_banner_ad_widget.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/star_field_background.dart';
 import '../main_shell.dart';
@@ -196,6 +197,10 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
         child: SafeArea(
           child: Column(
             children: [
+              // 1. AD FIRST: At the very top of the screen
+              const AppBannerAdWidget(),
+
+              // 2. AFTER AD: The TopBar (like chat section)
               _TopBar(
                 step: _step,
                 totalSteps: _totalSteps,

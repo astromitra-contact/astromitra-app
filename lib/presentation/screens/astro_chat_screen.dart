@@ -15,7 +15,6 @@ import '../widgets/chat_banner_ad_widget.dart';
 import '../widgets/chat_bubble.dart';
 import '../widgets/chat_input_bar.dart';
 import '../widgets/credit_badge.dart';
-import '../widgets/primary_button.dart';
 import '../widgets/state_views.dart';
 
 class AstroChatScreen extends StatefulWidget {
@@ -178,7 +177,7 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
                       SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Watch a short video ad to earn +20 extra credits!',
+                          'Watch 2 short video ads to earn +20 extra credits!',
                           style: TextStyle(
                             color: AppColors.goldBright,
                             fontWeight: FontWeight.w700,
@@ -218,7 +217,7 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
                   _handleClaimReward();
                 },
                 icon: const Icon(Icons.play_circle_filled_rounded, size: 18),
-                label: const Text('Watch Ad (+20 Credits)', style: TextStyle(fontWeight: FontWeight.w700)),
+                label: const Text('Watch 2 Ads (+20 Credits)', style: TextStyle(fontWeight: FontWeight.w700)),
               ),
           ],
         );
@@ -231,12 +230,77 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
     if (kundliId == null) return;
 
     final creditProvider = context.read<CreditProvider>();
-    final outcome = await creditProvider.claimDailyReward(kundliId);
+    if (creditProvider.isClaimingReward) return;
+
+    // Show initial notification
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            ),
+            SizedBox(width: 12),
+            Text('Loading Ad 1 of 2...'),
+          ],
+        ),
+        duration: Duration(seconds: 4),
+      ),
+    );
+
+    final outcome = await creditProvider.claimDailyReward(
+      kundliId,
+      onAdProgress: (completed, total) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        if (completed == 1) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  ),
+                  SizedBox(width: 12),
+                  Text('Ad 1 of 2 completed! Starting Ad 2 of 2...'),
+                ],
+              ),
+              duration: Duration(seconds: 4),
+            ),
+          );
+        } else if (completed == 2) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  ),
+                  SizedBox(width: 12),
+                  Text('Both ads watched! Adding +20 credits...'),
+                ],
+              ),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+    );
     if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     final message = switch (outcome) {
       RewardClaimOutcome.success => 'Success! +20 extra credits added to your account.',
-      RewardClaimOutcome.adNotCompleted => 'Watch the full ad to earn +20 bonus credits.',
+      RewardClaimOutcome.adNotCompleted => creditProvider.completedAds == 1
+          ? 'Completed 1 of 2 ads. Watch both full ads to earn +20 credits.'
+          : 'Please watch both full ads to earn +20 bonus credits.',
       RewardClaimOutcome.alreadyClaimed => 'You\'ve already claimed today\'s bonus.',
       RewardClaimOutcome.notEligibleYet => 'The bonus unlocks after your daily credits are used up.',
       RewardClaimOutcome.error => creditProvider.errorMessage ?? 'Could not claim bonus right now.',
@@ -308,11 +372,6 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
     final creditProvider = context.watch<CreditProvider>();
 
     final kundliId = kundliProvider.activeKundliId;
-    // Keyboard-open detection drives both the Scaffold's natural resize
-    // (default behavior) AND whether the banner ad is shown at all — the
-    // ad must never be present while the keyboard could push it into/over
-    // the input area, per spec.
-    final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
 
     if (kundliId == null) {
       return Scaffold(
@@ -333,164 +392,19 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
         if (!didPop && _selectedMessage != null) _clearSelection();
       },
       child: Scaffold(
-        appBar: _selectedMessage != null
-            ? AppBar(
-                backgroundColor: AppColors.surfaceElevated,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded),
-                  tooltip: 'Cancel',
-                  onPressed: _clearSelection,
-                ),
-                title: const Text('1', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                actions: [
-                  IconButton(
-                    tooltip: 'Reply',
-                    icon: const Icon(Icons.reply_rounded),
-                    onPressed: () {
-                      final msg = _selectedMessage!;
-                      setState(() {
-                        _replyingToMessage = msg;
-                      });
-                      _clearSelection();
-                      _inputFocusNode.requestFocus();
-                    },
-                  ),
-                  IconButton(
-                    tooltip: 'Copy',
-                    icon: const Icon(Icons.copy_rounded),
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: _selectedMessage!.text));
-                      _clearSelection();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Row(
-                            children: [
-                              Icon(Icons.check_rounded, color: Colors.white, size: 16),
-                              SizedBox(width: 8),
-                              Text('Copied to clipboard'),
-                            ],
-                          ),
-                          backgroundColor: AppColors.surfaceElevated,
-                          behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: AppColors.gold.withValues(alpha: 0.4)),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  IconButton(
-                    tooltip: 'Delete',
-                    icon: const Icon(Icons.delete_outline_rounded, color: AppColors.danger),
-                    onPressed: () {
-                      final msg = _selectedMessage!;
-                      _clearSelection();
-                      context.read<ChatProvider>().deleteMessage(msg);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Row(
-                            children: [
-                              Icon(Icons.delete_sweep_rounded, color: AppColors.danger, size: 16),
-                              SizedBox(width: 8),
-                              Text('Message deleted'),
-                            ],
-                          ),
-                          backgroundColor: AppColors.surfaceElevated,
-                          behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: AppColors.danger.withValues(alpha: 0.4)),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 4),
-                ],
-              )
-            : AppBar(
-        titleSpacing: 10,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset('assets/astro-icon.png', width: 36, height: 36, fit: BoxFit.contain),
-            ),
-            const SizedBox(width: 8),
-            const Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'AstroMitra',
-                    style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text('Online', style: TextStyle(fontSize: 11, color: AppColors.success)),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          Center(
-            child: CreditBadge(status: creditProvider.status, isLoading: creditProvider.isLoading),
-          ),
-          PopupMenuButton<String>(
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary, size: 20),
-            color: AppColors.surfaceElevated,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: AppColors.borderSoft),
-            ),
-            elevation: 8,
-            onSelected: (value) {
-              if (value == 'clear') {
-                _confirmClearChat();
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem<String>(
-                value: 'clear',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.danger),
-                    SizedBox(width: 10),
-                    Text(
-                      'Clear Chat',
-                      style: TextStyle(color: AppColors.danger, fontSize: 13.5, fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-      // Default resizeToAvoidBottomInset (true) shrinks the body when the
-      // keyboard opens, which is what naturally keeps the input bar
-      // sitting right above the keyboard rather than being hidden behind
-      // it — combined with hiding the banner ad below, nothing ends up
-      // clipped or covered in either state.
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(child: _buildMessageList(chatProvider)),
+        body: SafeArea(
+          child: Column(
+            children: [
+              // 1. AD FIRST: Positioned at the very top of the screen
+              const ChatBannerAdWidget(),
 
-            if (chatProvider.questionLimitReached)
-              _RewardPromptBanner(
-                isClaiming: creditProvider.isClaimingReward,
-                rewardEligible: creditProvider.status?.rewardEligible ?? true,
-                rewardClaimedToday: creditProvider.status?.rewardClaimedToday ?? false,
-                onWatchAd: _handleClaimReward,
-              ),
+              // 2. AFTER AD: The AppBar header row
+              _selectedMessage != null
+                  ? _buildSelectionHeader(context)
+                  : _buildNormalHeader(context, creditProvider),
+
+              Expanded(child: _buildMessageList(chatProvider)),
+
 
             if (_replyingToMessage != null)
               _ReplyPreviewBanner(
@@ -505,13 +419,6 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
               isSending: chatProvider.isSending,
               enabled: true,
             ),
-
-            // Hidden entirely while the keyboard is open — see class doc.
-            if (!keyboardOpen)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 6, top: 2),
-                child: Center(child: ChatBannerAdWidget()),
-              ),
           ],
         ),
       ),
@@ -560,75 +467,180 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
       },
     );
   }
-}
 
-class _RewardPromptBanner extends StatelessWidget {
-  final bool isClaiming;
-  final bool rewardEligible;
-  final bool rewardClaimedToday;
-  final VoidCallback onWatchAd;
-
-  const _RewardPromptBanner({
-    required this.isClaiming,
-    required this.rewardEligible,
-    required this.rewardClaimedToday,
-    required this.onWatchAd,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (rewardClaimedToday) {
-      return Container(
-        margin: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: AppColors.surfaceElevated, borderRadius: BorderRadius.circular(14)),
-        child: const Text(
-          'You\'ve used all of today\'s questions, including the bonus round. More questions unlock tomorrow.',
-          style: AppTextStyles.bodySecondary,
-        ),
-      );
-    }
-
+  Widget _buildNormalHeader(BuildContext context, CreditProvider creditProvider) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.warningBg,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          bottom: BorderSide(color: AppColors.borderSoft, width: 0.8),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          const Row(
-            children: [
-              Icon(Icons.play_circle_outline_rounded, color: AppColors.warning, size: 20),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Today\'s free questions are used up',
-                  style: TextStyle(color: AppColors.warning, fontWeight: FontWeight.w700, fontSize: 13.5),
+          if (Navigator.of(context).canPop())
+            IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          else
+            const SizedBox(width: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset('assets/astro-icon.png', width: 36, height: 36, fit: BoxFit.contain),
+          ),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'AstroMitra',
+                  style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text('Online', style: TextStyle(fontSize: 11, color: AppColors.success)),
+              ],
+            ),
+          ),
+          Center(
+            child: CreditBadge(
+              status: creditProvider.status,
+              isLoading: creditProvider.isLoading,
+              onTap: _showOutOfCreditsDialog,
+            ),
+          ),
+          PopupMenuButton<String>(
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary, size: 20),
+            color: AppColors.surfaceElevated,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: AppColors.borderSoft),
+            ),
+            elevation: 8,
+            onSelected: (value) {
+              if (value == 'clear') {
+                _confirmClearChat();
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem<String>(
+                value: 'clear',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.danger),
+                    SizedBox(width: 10),
+                    Text(
+                      'Clear Chat',
+                      style: TextStyle(color: AppColors.danger, fontSize: 13.5, fontWeight: FontWeight.w600),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          const Text(
-            'Watch a short ad to earn +20 credits and 2 more questions today.',
-            style: AppTextStyles.bodySecondary,
+          const SizedBox(width: 4),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectionHeader(BuildContext context) {
+    return Container(
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceElevated,
+        border: Border(
+          bottom: BorderSide(color: AppColors.borderSoft, width: 0.8),
+        ),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+            tooltip: 'Cancel',
+            onPressed: _clearSelection,
           ),
-          const SizedBox(height: 12),
-          PrimaryButton(
-            label: 'Watch ad for bonus credits',
-            icon: Icons.play_arrow_rounded,
-            isLoading: isClaiming,
-            onPressed: onWatchAd,
+          const SizedBox(width: 8),
+          const Text('1', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+          const Spacer(),
+          IconButton(
+            tooltip: 'Reply',
+            icon: const Icon(Icons.reply_rounded, color: AppColors.textPrimary),
+            onPressed: () {
+              final msg = _selectedMessage!;
+              setState(() {
+                _replyingToMessage = msg;
+              });
+              _clearSelection();
+              _inputFocusNode.requestFocus();
+            },
           ),
+          IconButton(
+            tooltip: 'Copy',
+            icon: const Icon(Icons.copy_rounded, color: AppColors.textPrimary),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: _selectedMessage!.text));
+              _clearSelection();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.check_rounded, color: Colors.white, size: 16),
+                      SizedBox(width: 8),
+                      Text('Copied to clipboard'),
+                    ],
+                  ),
+                  backgroundColor: AppColors.surfaceElevated,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: AppColors.gold.withValues(alpha: 0.4)),
+                  ),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            tooltip: 'Delete',
+            icon: const Icon(Icons.delete_outline_rounded, color: AppColors.danger),
+            onPressed: () {
+              final msg = _selectedMessage!;
+              _clearSelection();
+              context.read<ChatProvider>().deleteMessage(msg);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.delete_sweep_rounded, color: AppColors.danger, size: 16),
+                      SizedBox(width: 8),
+                      Text('Message deleted'),
+                    ],
+                  ),
+                  backgroundColor: AppColors.surfaceElevated,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: AppColors.danger.withValues(alpha: 0.4)),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 4),
         ],
       ),
     );
   }
 }
+
 
 class _ChatWelcomeView extends StatelessWidget {
   final ValueChanged<String> onPromptSelected;

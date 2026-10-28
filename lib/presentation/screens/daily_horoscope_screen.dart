@@ -6,6 +6,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../data/models/horoscope_models.dart';
 import '../providers/horoscope_provider.dart';
 import '../providers/kundli_provider.dart';
+import '../widgets/chat_banner_ad_widget.dart';
 import '../widgets/star_field_background.dart';
 
 class DailyHoroscopeScreen extends StatefulWidget {
@@ -68,6 +69,10 @@ class _DailyHoroscopeScreenState extends State<DailyHoroscopeScreen> {
         child: SafeArea(
           child: Column(
             children: [
+              // 1. AD FIRST: At the very top of the screen
+              const AppBannerAdWidget(),
+
+              // 2. AFTER AD: The TopBar (like chat section)
               _buildAppBar(context, provider),
               const SizedBox(height: 6),
               _buildSignsCarousel(provider),

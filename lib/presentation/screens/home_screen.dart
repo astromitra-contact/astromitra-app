@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/ads/ad_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../data/models/chat_models.dart';
@@ -34,6 +35,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final kundliId = context.read<KundliProvider>().activeKundliId;
     if (kundliId == null) return;
     await context.read<CreditProvider>().refresh(kundliId);
+  }
+
+  void _navigateWithAd(Widget screen) {
+    AdService.instance.showInterstitialAd(
+      onComplete: () {
+        if (!mounted) return;
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => screen),
+        );
+      },
+    );
   }
 
   @override
@@ -113,9 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 8),
               _WelcomeBanner(
-                onExplore: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ViewKundliScreen()),
-                ),
+                onExplore: () => _navigateWithAd(const ViewKundliScreen()),
               ),
               const SizedBox(height: 22),
               Text(context.tr('whatWouldYouLikeToDo'), style: AppTextStyles.heading),
@@ -124,12 +134,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.grid_view_rounded,
                 title: context.tr('createKundli'),
                 subtitle: context.tr('createKundliSubtitle'),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => kundliProvider.hasActiveKundli
-                        ? const ViewKundliScreen()
-                        : const OnboardingFlowScreen(),
-                  ),
+                onTap: () => _navigateWithAd(
+                  kundliProvider.hasActiveKundli
+                      ? const ViewKundliScreen()
+                      : const OnboardingFlowScreen(),
                 ),
               ),
               const SizedBox(height: 12),
@@ -137,18 +145,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.chat_bubble_rounded,
                 title: context.tr('chatWithAstroMitra'),
                 subtitle: context.tr('chatSubtitle'),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AstroChatScreen()),
-                ),
+                onTap: () => _navigateWithAd(const AstroChatScreen()),
               ),
               const SizedBox(height: 12),
               _HomeActionTile(
                 icon: Icons.auto_awesome_rounded,
                 title: context.tr('dailyHoroscope'),
                 subtitle: context.tr('horoscopeSubtitle'),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const DailyHoroscopeScreen()),
-                ),
+                onTap: () => _navigateWithAd(const DailyHoroscopeScreen()),
               ),
               const SizedBox(height: 20),
               _DailyCreditsCard(
