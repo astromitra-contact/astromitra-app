@@ -37,6 +37,7 @@ class ChatInputBar extends StatelessWidget {
               child: TextField(
                 controller: controller,
                 focusNode: focusNode,
+                autofillHints: null,
                 enabled: enabled && !isSending,
                 minLines: 1,
                 maxLines: 5,

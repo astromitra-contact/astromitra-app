@@ -43,28 +43,28 @@ class AppConfig {
   /// See https://developers.google.com/admob/android/test-ads
   static const String admobAppId = String.fromEnvironment(
     'ADMOB_APP_ID',
-    defaultValue: 'ca-app-pub-3940256099942544~3347511713', // Google test App ID
+    defaultValue: 'ca-app-pub-7945759979159490~1234447110',
   );
 
-  /// Demo App Open ad unit ID: ca-app-pub-3940256099942544/9257395921
+
   static const String admobAppOpenUnitId = String.fromEnvironment(
     'ADMOB_APP_OPEN_UNIT_ID',
-    defaultValue: 'ca-app-pub-3940256099942544/9257395921', // Google test App Open unit
+    defaultValue: 'ca-app-pub-7945759979159490/1978401778',
   );
 
   static const String admobBannerUnitId = String.fromEnvironment(
     'ADMOB_BANNER_UNIT_ID',
-    defaultValue: 'ca-app-pub-3940256099942544/6300978111', // Google test banner unit
+    defaultValue: 'ca-app-pub-7945759979159490/8134027841',
   );
 
   static const String admobRewardedUnitId = String.fromEnvironment(
     'ADMOB_REWARDED_UNIT_ID',
-    defaultValue: 'ca-app-pub-3940256099942544/5224354917', // Google test rewarded unit
+    defaultValue: 'ca-app-pub-7945759979159490/6167047896',
   );
 
   static const String admobInterstitialUnitId = String.fromEnvironment(
     'ADMOB_INTERSTITIAL_UNIT_ID',
-    defaultValue: 'ca-app-pub-3940256099942544/1033173712', // Google test interstitial unit
+    defaultValue: 'ca-app-pub-7945759979159490/9085901459',
   );
 
   /// True when still using Google's published test ad unit IDs (i.e. no

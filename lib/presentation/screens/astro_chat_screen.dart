@@ -71,17 +71,20 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
     });
   }
 
-  Future<void> _handleSend() async {
+  Future<void> _handleSend({String? promptText}) async {
     final kundliId = context.read<KundliProvider>().activeKundliId;
     final creditProvider = context.read<CreditProvider>();
     final canAsk = creditProvider.status?.canAskNow ?? true;
 
     if (!canAsk) {
+      _textController.clear();
+      _inputFocusNode.unfocus();
+      FocusScope.of(context).unfocus();
       _showOutOfCreditsDialog();
       return;
     }
 
-    final rawQuestion = _textController.text.trim();
+    final rawQuestion = (promptText ?? _textController.text).trim();
     if (kundliId == null || rawQuestion.isEmpty) return;
 
     String question = rawQuestion;
@@ -110,7 +113,10 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
       await context.read<CreditProvider>().refresh(kundliId);
     } else {
       if (chatProvider.questionLimitReached) {
-        _showOutOfCreditsDialog();
+        _textController.clear();
+      _inputFocusNode.unfocus();
+      FocusScope.of(context).unfocus();
+      _showOutOfCreditsDialog();
       } else if (chatProvider.errorMessage != null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(chatProvider.errorMessage!)));
       }
@@ -118,6 +124,9 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
   }
 
   void _showOutOfCreditsDialog() {
+    _textController.clear();
+    _inputFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
     final creditProvider = context.read<CreditProvider>();
     final isClaimed = creditProvider.status?.rewardClaimedToday ?? false;
 
@@ -226,16 +235,23 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
   }
 
   Future<void> _handleClaimReward() async {
+    _textController.clear();
+    _inputFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
     final kundliId = context.read<KundliProvider>().activeKundliId;
     if (kundliId == null) return;
 
     final creditProvider = context.read<CreditProvider>();
     if (creditProvider.isClaimingReward) return;
+    /*
 
-    // Show initial notification
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+
+
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+
         content: Row(
           children: [
             SizedBox(
@@ -244,21 +260,24 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
             ),
             SizedBox(width: 12),
-            Text('Loading Ad 1 of 2...'),
+
           ],
         ),
-        duration: Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+
       ),
     );
 
-    final outcome = await creditProvider.claimDailyReward(
-      kundliId,
-      onAdProgress: (completed, total) {
+    */
+    final outcome = await creditProvider.claimDailyReward(kundliId);
+    /*
+
+
         if (!mounted) return;
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         if (completed == 1) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+      
+      
               content: Row(
                 children: [
                   SizedBox(
@@ -267,15 +286,16 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   ),
                   SizedBox(width: 12),
-                  Text('Ad 1 of 2 completed! Starting Ad 2 of 2...'),
+
                 ],
               ),
-              duration: Duration(seconds: 4),
+              behavior: SnackBarBehavior.floating,
+
             ),
           );
         } else if (completed == 2) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+      
+      
               content: Row(
                 children: [
                   SizedBox(
@@ -284,10 +304,11 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   ),
                   SizedBox(width: 12),
-                  Text('Both ads watched! Adding +20 credits...'),
+
                 ],
               ),
-              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+
             ),
           );
         }
@@ -295,6 +316,13 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
     );
     if (!mounted) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    */
+    if (!mounted) return;
 
     final message = switch (outcome) {
       RewardClaimOutcome.success => 'Success! +20 extra credits added to your account.',
@@ -306,12 +334,18 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
       RewardClaimOutcome.error => creditProvider.errorMessage ?? 'Could not claim bonus right now.',
     };
 
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
+        behavior: SnackBarBehavior.floating,
         backgroundColor: outcome == RewardClaimOutcome.success ? AppColors.success : null,
       ),
     );
+
+    _textController.clear();
+    _inputFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
 
     if (outcome == RewardClaimOutcome.success) {
       context.read<ChatProvider>().clearError();
@@ -434,8 +468,8 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
     if (chatProvider.messages.isEmpty) {
       return _ChatWelcomeView(
         onPromptSelected: (text) {
-          _textController.text = text;
-          _handleSend();
+
+          _handleSend(promptText: text);
         },
       );
     }
@@ -587,6 +621,7 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
             onPressed: () {
               Clipboard.setData(ClipboardData(text: _selectedMessage!.text));
               _clearSelection();
+          
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Row(
@@ -598,7 +633,7 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
                   ),
                   backgroundColor: AppColors.surfaceElevated,
                   behavior: SnackBarBehavior.floating,
-                  duration: const Duration(seconds: 2),
+          
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                     side: BorderSide(color: AppColors.gold.withValues(alpha: 0.4)),
@@ -614,6 +649,7 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
               final msg = _selectedMessage!;
               _clearSelection();
               context.read<ChatProvider>().deleteMessage(msg);
+          
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Row(
@@ -625,7 +661,7 @@ class _AstroChatScreenState extends State<AstroChatScreen> {
                   ),
                   backgroundColor: AppColors.surfaceElevated,
                   behavior: SnackBarBehavior.floating,
-                  duration: const Duration(seconds: 2),
+          
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                     side: BorderSide(color: AppColors.danger.withValues(alpha: 0.4)),

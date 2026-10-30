@@ -8,6 +8,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../data/models/kundli_models.dart';
+import '../ads/ad_service.dart';
 
 enum KundliPdfFormat {
   northIndian,
@@ -918,6 +919,20 @@ class KundliPdfService {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (bottomSheetContext) {
+        void startDownloadWithAd(KundliPdfFormat format) {
+          Navigator.pop(bottomSheetContext);
+          AdService.instance.showInterstitialAd(
+            onComplete: () {
+              if (!context.mounted) return;
+              handleKundliDownload(
+                context,
+                kundli: kundli,
+                format: format,
+              );
+            },
+          );
+        }
+
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -961,14 +976,7 @@ class KundliPdfService {
                   subtitle: 'Traditional diamond chart format',
                   icon: Icons.auto_awesome_rounded,
                   isRecommended: currentActiveTab == 0,
-                  onTap: () {
-                    Navigator.pop(bottomSheetContext);
-                    handleKundliDownload(
-                      context,
-                      kundli: kundli,
-                      format: KundliPdfFormat.northIndian,
-                    );
-                  },
+                  onTap: () => startDownloadWithAd(KundliPdfFormat.northIndian),
                 ),
                 const SizedBox(height: 8),
                 _FormatOptionTile(
@@ -976,14 +984,7 @@ class KundliPdfService {
                   subtitle: 'Traditional 12-house grid format',
                   icon: Icons.grid_view_rounded,
                   isRecommended: currentActiveTab == 1,
-                  onTap: () {
-                    Navigator.pop(bottomSheetContext);
-                    handleKundliDownload(
-                      context,
-                      kundli: kundli,
-                      format: KundliPdfFormat.southIndian,
-                    );
-                  },
+                  onTap: () => startDownloadWithAd(KundliPdfFormat.southIndian),
                 ),
                 const SizedBox(height: 8),
                 _FormatOptionTile(
@@ -991,14 +992,7 @@ class KundliPdfService {
                   subtitle: 'Complete report with both charts in one PDF',
                   icon: Icons.file_copy_rounded,
                   badgeText: 'COMPLETE',
-                  onTap: () {
-                    Navigator.pop(bottomSheetContext);
-                    handleKundliDownload(
-                      context,
-                      kundli: kundli,
-                      format: KundliPdfFormat.both,
-                    );
-                  },
+                  onTap: () => startDownloadWithAd(KundliPdfFormat.both),
                 ),
               ],
             ),
